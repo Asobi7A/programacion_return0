@@ -1,0 +1,211 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <limits>
+using namespace std;
+
+struct Libro {
+    string titulo;
+    string autor;
+    string editorial;
+    double precio;
+    bool disponible;
+};
+
+// Inventario global
+vector<Libro> inventario;
+
+// Credenciales fijas para personal
+const string usuarioPersonal = "admin";
+const string contrasenaPersonal = "1234";
+
+// Funciones
+void agregarLibro() {
+    Libro nuevo;
+    cout << "Ingrese el titulo del libro: ";
+    getline(cin, nuevo.titulo);
+    cout << "Ingrese el autor: ";
+    getline(cin, nuevo.autor);
+    cout << "Ingrese la editorial: ";
+    getline(cin, nuevo.editorial);
+    cout << "Ingrese el precio: ";
+    cin >> nuevo.precio;
+    nuevo.disponible = true;
+    cin.ignore();
+    inventario.push_back(nuevo);
+    cout << "Libro agregado exitosamente.\n";
+}
+
+void mostrarInventario() {
+    if (inventario.empty()) {
+        cout << "Inventario vacio.\n";
+        return;
+    }
+    for (size_t i = 0; i < inventario.size(); ++i) {
+        cout << "\nLibro #" << i + 1 << "\n";
+        cout << "Titulo: " << inventario[i].titulo << "\n";
+        cout << "Autor: " << inventario[i].autor << "\n";
+        cout << "Editorial: " << inventario[i].editorial << "\n";
+        cout << "Precio: $" << inventario[i].precio << "\n";
+        cout << "Disponible: " << (inventario[i].disponible ? "Si" : "No") << "\n";
+    }
+}
+
+void buscarLibro() {
+    string titulo;
+    cout << "Ingrese el titulo exacto del libro: ";
+    getline(cin, titulo);
+    for (const auto& libro : inventario) {
+        if (libro.titulo == titulo) {
+            cout << "Autor: " << libro.autor << "\n";
+            cout << "Editorial: " << libro.editorial << "\n";
+            cout << "Precio: $" << libro.precio << "\n";
+            cout << "Disponible: " << (libro.disponible ? "Si" : "No") << "\n";
+            return;
+        }
+    }
+    cout << "Libro no encontrado.\n";
+}
+
+void editarLibro() {
+    string titulo;
+    cout << "Ingrese el titulo del libro a editar: ";
+    getline(cin, titulo);
+    for (auto& libro : inventario) {
+        if (libro.titulo == titulo) {
+            cout << "Nuevo precio: ";
+            cin >> libro.precio;
+            char dispo;
+            cout << "¿Está disponible? (s/n): ";
+            cin >> dispo;
+            libro.disponible = (dispo == 's' || dispo == 'S');
+            cin.ignore();
+            cout << "Libro actualizado.\n";
+            return;
+        }
+    }
+    cout << "Libro no encontrado.\n";
+}
+
+void eliminarLibro() {
+    string titulo;
+    cout << "Ingrese el titulo del libro a eliminar: ";
+    getline(cin, titulo);
+    for (size_t i = 0; i < inventario.size(); ++i) {
+        if (inventario[i].titulo == titulo) {
+            inventario.erase(inventario.begin() + i);
+            cout << "Libro eliminado del inventario.\n";
+            return;
+        }
+    }
+    cout << "Libro no encontrado.\n";
+}
+
+void comprarLibro() {
+    string titulo;
+    cout << "Ingrese el titulo del libro que desea comprar: ";
+    getline(cin, titulo);
+    for (auto& libro : inventario) {
+        if (libro.titulo == titulo) {
+            if (libro.disponible) {
+                cout << "Libro disponible. Precio: $" << libro.precio << "\n";
+                cout << "Compra realizada con éxito.\n";
+                libro.disponible = false;
+                return;
+            } else {
+                cout << "Lo sentimos, el libro no está disponible.\n";
+                return;
+            }
+        }
+    }
+    cout << "Libro no encontrado.\n";
+}
+
+void menuPersonal() {
+    int opcion;
+    do {
+        cout << "\n--- MENU PERSONAL ---\n";
+        cout << "1. Agregar libro\n";
+        cout << "2. Mostrar inventario\n";
+        cout << "3. Editar libro\n";
+        cout << "4. Buscar libro\n";
+        cout << "5. Eliminar libro\n";
+        cout << "6. Salir\n";
+        cout << "Seleccione una opcion: ";
+        cin >> opcion;
+        cin.ignore();
+        switch (opcion) {
+            case 1: agregarLibro(); break;
+            case 2: mostrarInventario(); break;
+            case 3: editarLibro(); break;
+            case 4: buscarLibro(); break;
+            case 5: eliminarLibro(); break;
+            case 6: cout << "Cerrando sesion...\n"; break;
+            default: cout << "Opcion invalida.\n";
+        }
+    } while (opcion != 6);
+}
+
+void menuCliente() {
+    int opcion;
+    do {
+        cout << "\n--- MENU CLIENTE ---\n";
+        cout << "1. Buscar libro\n";
+        cout << "2. Comprar libro\n";
+        cout << "3. Ver inventario\n";
+        cout << "4. Salir\n";
+        cout << "Seleccione una opcion: ";
+        cin >> opcion;
+        cin.ignore();
+        switch (opcion) {
+            case 1: buscarLibro(); break;
+            case 2: comprarLibro(); break;
+            case 3: mostrarInventario(); break;
+            case 4: cout << "Gracias por visitar la libreria.\n"; break;
+            default: cout << "Opcion invalida.\n";
+        }
+    } while (opcion != 4);
+}
+
+void loginPersonal() {
+    string user, pass;
+    cout << "Usuario: ";
+    getline(cin, user);
+    cout << "Contrasena: ";
+    getline(cin, pass);
+    if (user == usuarioPersonal && pass == contrasenaPersonal) {
+        cout << "Acceso concedido.\n";
+        menuPersonal();
+    } else {
+        cout << "Credenciales incorrectas.\n";
+    }
+}
+
+void menuPrincipal() {
+    int tipo;
+    do {
+        cout << "\n--- SISTEMA DE LIBRERIA ---\n";
+        cout << "1. Cliente\n";
+        cout << "2. Personal\n";
+        cout << "3. Salir\n";
+        cout << "Seleccione su rol: ";
+        cin >> tipo;
+        cin.ignore();
+        switch (tipo) {
+            case 1: menuCliente(); break;
+            case 2: loginPersonal(); break;
+            case 3: cout << "Saliendo del sistema.\n"; break;
+            default: cout << "Opcion invalida.\n";
+        }
+    } while (tipo != 3);
+}
+
+int main() {
+    // Libros iniciales
+    inventario.push_back({"Cien años de soledad", "Gabriel García Márquez", "Sudamericana", 39.99, true});
+    inventario.push_back({"1984", "George Orwell", "Secker & Warburg", 25.50, true});
+    inventario.push_back({"Don Quijote de la Mancha", "Miguel de Cervantes", "Francisco de Robles", 30.00, true});
+
+    menuPrincipal();
+    return 0;
+}
